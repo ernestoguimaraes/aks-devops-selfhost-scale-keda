@@ -1,0 +1,42 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: azdevops-scaledjob
+spec:
+  jobTargetRef:
+    parallelism: 2                            # [max number of desired pods](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#controlling-parallelism)
+    completions: 1                            # [desired number of successfully finished pods](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#controlling-parallelism)
+    activeDeadlineSeconds: 30                 #  Specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer
+    backoffLimit: 6                           # Specifies the number of retries before marking this job failed. Defaults to 6
+    template:
+      spec:        
+        containers:
+        - name: dockeragent
+          image: <CR NAME>.azurecr.io/dockeragent:v1
+          imagePullPolicy: Always
+          env:
+          - name: AZP_URL
+            value: "https://<YOUR ORGANIZATION NAME FROM DEVOPS>.visualstudio.com"
+          - name: AZP_TOKEN
+            value: <YOUR PAT TOKEN>
+          - name: AZP_POOL
+            value: "<AGENT POOL NAME>"
+          volumeMounts:
+          - mountPath: /var/run/docker.sock
+            name: docker-volume
+        volumes:
+        - name: docker-volume
+          hostPath:
+            path: /var/run/docker.sock
+  pollingInterval: 15
+  successfulJobsHistoryLimit: 30
+  failedJobsHistoryLimit: 5
+  maxReplicaCount: 100 
+  scalingStrategy:
+    strategy: "default"               
+  triggers:
+  - type: azure-pipelines
+    metadata:
+      poolID: "10"
+      organizationURLFromEnv: AZP_URL
+      personalAccessTokenFromEnv: AZP_TOKEN

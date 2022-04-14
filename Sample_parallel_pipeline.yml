@@ -1,0 +1,39 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+#The name of your Self Hosted Agent
+pool:
+  name: keda-agent
+
+#Parallel with Strategy/Matrix 
+#https://docs.microsoft.com/en-us/azure/devops/pipelines/customize-pipeline?view=azure-devops#build-across-multiple-platforms
+
+jobs:
+  - job: buildApp
+    strategy:
+      matrix:
+        build01:
+          myVar: '1.0'
+        build02:
+          myVar: '1.0'
+        build03:
+          myVar: '1.0'
+        build04:
+          myVar: '1.0'
+        build05:
+          myVar: '1.0'
+        build06:
+          myVar: '1.0'
+      maxParallel: 7
+
+    steps:
+    - script: |
+        echo "Hello from inside Docker Container: $HOSTNAME"
+        printenv
+
+
