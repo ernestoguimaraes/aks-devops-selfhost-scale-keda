@@ -37,6 +37,6 @@ spec:
   triggers:
   - type: azure-pipelines
     metadata:
-      poolID: "10"
+      poolID: "<POOL ID>"
       organizationURLFromEnv: AZP_URL
       personalAccessTokenFromEnv: AZP_TOKEN
